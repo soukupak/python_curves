@@ -8,6 +8,7 @@ def print_something():
             # print_rect_hatch(40, 400, 400),
             print_rect_hatch_param(40, 500, 500, 4),
             print_rect_hatch_param(20, 400, 400, 2),
+            print_curve(200, 200, 80),
             svg.Circle(
                 cx=30, cy=30, r=20,
                 stroke="red",
@@ -37,24 +38,24 @@ def print_rect_hatch(size, pos_x, pos_y):
         points=[
             pos_x+step_1, pos_y,
             pos_x, pos_y+step_1,
-            pos_x, pos_y+step_2, 
-            pos_x+step_2, pos_y, 
-            pos_x+step_3, pos_y, 
-            pos_x, pos_y+step_3, 
-            pos_x, pos_y+step_4, 
-            pos_x+step_4, pos_y, 
-            pos_x+step_4, pos_y+step_1, 
-            pos_x+step_1, pos_y+step_4, 
-            pos_x+step_2, pos_y+step_4, 
-            pos_x+step_4, pos_y+step_2, 
-            pos_x+step_4, pos_y+step_3, 
+            pos_x, pos_y+step_2,
+            pos_x+step_2, pos_y,
+            pos_x+step_3, pos_y,
+            pos_x, pos_y+step_3,
+            pos_x, pos_y+step_4,
+            pos_x+step_4, pos_y,
+            pos_x+step_4, pos_y+step_1,
+            pos_x+step_1, pos_y+step_4,
+            pos_x+step_2, pos_y+step_4,
+            pos_x+step_4, pos_y+step_2,
+            pos_x+step_4, pos_y+step_3,
             pos_x+step_3, pos_y+step_4
             ]
         )
 
 # density means into how many parts should the square be divided
 def print_rect_hatch_param(size, pos_x, pos_y, density):
-    # we can imagine the hatch as a division of two lengths of the rectangle sides 
+    # we can imagine the hatch as a division of two lengths of the rectangle sides
     # into specific number of parts and the lines are the division lines
     # example: size 8 square with density 2 means that line will be every two steps
     # and there will be 8 parts in total which means 7 lines
@@ -84,3 +85,85 @@ def print_rect_hatch_param(size, pos_x, pos_y, density):
             stroke_width=1,
             points=multiline_points
             )
+
+
+
+def print_curve(start_x, start_y, size):
+    return svg.Polyline(
+            fill="none",
+            stroke="black",
+            stroke_width=1,
+            points=hilbert_curve(start_x, start_y, size)
+            )
+
+# hilbert curve grammar
+# up -> right ^ up > up v left
+# right -> up > right ^ right < down
+# left -> down < left v left > up
+# down -> left v down < down ^ right
+
+# sizing
+# lets make it so that the basic curve is 1/4 size of the edge
+# 2/4 size long and connective parts are 2/4 long
+def hilbert_curve(start_x, start_y, size):
+    size_part = size//4
+
+    points = []
+    points.append(draw_right(start_x+size_part, start_y+3*size_part, size_part))
+    points.append(draw_up(start_x+size_part, start_y+size_part, size_part))
+    points.append(draw_up(start_x+3*size_part, start_y+size_part, size_part))
+    points.append(draw_left(start_x+3*size_part, start_y+3*size_part, size_part))
+    return points
+
+
+# assume start is top left corner
+def draw_up(start_x, start_y, size):
+    points = []
+    points.append(start_x)
+    points.append(start_y+size)
+    points.append(start_x)
+    points.append(start_y)
+    points.append(start_x+size)
+    points.append(start_y)
+    points.append(start_x+size)
+    points.append(start_y+size)
+    return points
+
+# assume start is top left corner
+def draw_right(start_x, start_y, size):
+    points = []
+    points.append(start_x)
+    points.append(start_y+size)
+    points.append(start_x+size)
+    points.append(start_y+size)
+    points.append(start_x+size)
+    points.append(start_y)
+    points.append(start_x)
+    points.append(start_y)
+    return points
+
+# assume start is top left corner
+def draw_left(start_x, start_y, size):
+    points = []
+    points.append(start_x+size)
+    points.append(start_y)
+    points.append(start_x)
+    points.append(start_y)
+    points.append(start_x)
+    points.append(start_y+size)
+    points.append(start_x+size)
+    points.append(start_y+size)
+    return points
+
+# assume start is top left corner
+def draw_down(start_x, start_y, size):
+    points = []
+    points.append(start_x+size)
+    points.append(start_y)
+    points.append(start_x+size)
+    points.append(start_y+size)
+    points.append(start_x)
+    points.append(start_y+size)
+    points.append(start_x)
+    points.append(start_y)
+    return points
